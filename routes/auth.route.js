@@ -15,7 +15,7 @@ const {
   logoutService,
 } = require("../services/authService");
 const { authValid } = require("../validation/authValidation");
-
+const authMiddleware = require("../middlewares/auth.middleware");
 authRouter.post("/login", authController);
 
 //sendMail
@@ -54,17 +54,12 @@ authRouter.get("/verify/:token", getVerifyAccount);
  *       200:
  *         description: Successful response
  */
-authRouter.post("/register", authValid.registerValid, registerUserController);
-authRouter.post("/logout-user", authenticateToken, (req, res) => {
-  logoutService(req.user.userUuid).then(
-    (logout) => {
-      return res.json(logout);
-    },
-    (err) => {
-      return next(new Exeptions(err.message, err.status));
-    }
-  );
 
-  // res.json(req.user);
-});
+authRouter.post(
+  "/register",
+  authMiddleware.registerRules(),
+  helpers_middleware_1.default.entityValidator,
+  (0, response_1.wrapAsync)(auth_controller_1.default.registerController)
+);
+
 module.exports = authRouter;
