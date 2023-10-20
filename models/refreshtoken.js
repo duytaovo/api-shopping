@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class AccessToken extends Model {
+  class RefreshToken extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
@@ -12,17 +12,17 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(User, { foreignKey: "user_id", as: "User" });
     }
     toJSON() {
-      return this.get("accessToken");
+      return this.get("refreshToken");
     }
   }
-  AccessToken.init(
+  RefreshToken.init(
     {
       token: DataTypes.STRING,
     },
     {
       sequelize,
-      modelName: "AccessToken",
+      modelName: "RefreshToken",
     }
   );
-  return AccessToken;
+  return RefreshToken;
 };

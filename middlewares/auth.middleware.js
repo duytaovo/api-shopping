@@ -3,12 +3,13 @@ const jwt = require("../utils/jwt");
 const role = require("../constants/role.enum");
 const response = require("../utils/response");
 const status = require("../constants/status");
-const access_token_model = require("../database/models/access-token.model");
-const refresh_token_model = require("../database/models/refresh-token.model");
-const express_validator = require("express-validator");
-const user_model = require("../database/models/user.model");
+// const access_token_model = require("../database/models/access-token.model");
+// const refresh_token_model = require("../database/models/refresh-token.model");
+const { body } = require("express-validator");
 
-const verifyAccessToken = async (req, res, next) => {
+const db = require("../models");
+
+module.exports.verifyAccessToken = async (req, res, next) => {
   var _a;
   const access_token =
     (_a = req.headers.authorization) === null || _a === void 0
@@ -46,7 +47,7 @@ const verifyAccessToken = async (req, res, next) => {
     )
   );
 };
-const verifyRefreshToken = async (req, res, next) => {
+module.exports.verifyRefreshToken = async (req, res, next) => {
   const refresh_token = req.body.refresh_token;
   if (refresh_token) {
     try {
@@ -81,7 +82,7 @@ const verifyRefreshToken = async (req, res, next) => {
     )
   );
 };
-const verifyAdmin = async (req, res, next) => {
+module.exports.verifyAdmin = async (req, res, next) => {
   const userDB = await user_model.UserModel.findById(req.jwtDecoded.id).lean();
   if (userDB.roles.includes(role.ROLE.ADMIN)) {
     return next();
@@ -94,38 +95,29 @@ const verifyAdmin = async (req, res, next) => {
     )
   );
 };
-const registerRules = () => {
+module.exports.registerRules = () => {
   return [
-    (0, express_validator.body)("email")
+    body("email")
       .isEmail()
       .withMessage("Email không đúng định dạng")
       .isLength({ min: 5, max: 160 })
       .withMessage("Email phải từ 5-160 kí tự"),
-    (0, express_validator.body)("password")
+    body("password")
       .exists({ checkFalsy: true })
       .withMessage("Mật khẩu không được để trống")
       .isLength({ min: 6, max: 160 })
       .withMessage("Mật khẩu phải từ 6-160 kí tự"),
   ];
 };
-const loginRules = () => {
+module.exports.loginRules = () => {
   return [
-    (0, express_validator.body)("email")
+    body("email")
       .isEmail()
       .withMessage("Email không đúng định dạng")
       .isLength({ min: 5, max: 160 })
       .withMessage("Email phải từ 5-160 kí tự"),
-    (0, express_validator.body)("password")
+    body("password")
       .isLength({ min: 6, max: 160 })
       .withMessage("Mật khẩu phải từ 6-160 kí tự"),
   ];
 };
-const authMiddleware = {
-  verifyAccessToken,
-  verifyAdmin,
-  registerRules,
-  loginRules,
-  verifyRefreshToken,
-};
-
-module.exports.authMiddleware = authMiddleware;

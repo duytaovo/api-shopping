@@ -1,48 +1,10 @@
 const express = require("express");
 const authRouter = express.Router();
-const { authenticateToken } = require("../middlewares/authenticateToken");
-const {
-  authController,
-  checkLoggedOut,
-  registerUserController,
-  getVerifyAccount,
-  LoggedOutUserController,
-} = require("../controllers/authController");
-const {
-  authService,
-  registerUserService,
-  verifyAccount,
-  logoutService,
-} = require("../services/authService");
-const { authValid } = require("../validation/authValidation");
+
 const authMiddleware = require("../middlewares/auth.middleware");
-authRouter.post("/login", authController);
-
-//sendMail
-/**
- * @swagger
- * tags:
- *   name: auth
- *   description: Auth management
- */
-
-/**
- * @swagger
- * /:
- *   get:
- *     summary: get a  verify account
- *     tags: [Auth]
- *     responses:
- *       200:
- *         description: Successful response
- */
-authRouter.get("/verify/:token", getVerifyAccount);
-/**
- * @swagger
- * tags:
- *   name: auth
- *   description: Auth management
- */
+const helpersMiddleware = require("../middlewares/helpers.middleware");
+const authController = require("../controllers/auth.controller");
+const { authenticateToken } = require("../middlewares/authenticateToken");
 
 /**
  * @swagger
@@ -58,8 +20,27 @@ authRouter.get("/verify/:token", getVerifyAccount);
 authRouter.post(
   "/register",
   authMiddleware.registerRules(),
-  helpers_middleware_1.default.entityValidator,
-  (0, response_1.wrapAsync)(auth_controller_1.default.registerController)
+  helpersMiddleware.entityValidator,
+  authController.registerController
 );
 
+authRouter.post(
+  "/login",
+  authMiddleware.loginRules(),
+  helpersMiddleware.entityValidator,
+  authController.loginController
+);
+
+authRouter.post("/logout", authenticateToken, (req, res) => {
+  logoutService(req.user.userUuid).then(
+    (logout) => {
+      return res.json(logout);
+    },
+    (err) => {
+      return next(new Exeptions(err.message, err.status));
+    }
+  );
+
+  // res.json(req.user);
+});
 module.exports = authRouter;

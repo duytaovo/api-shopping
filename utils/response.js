@@ -37,7 +37,6 @@ const responseError = (res, error) => {
 };
 exports.responseError = responseError;
 
-const responseSuccess = (res, data) => {
+module.exports.responseSuccess = (res, data) => {
   return res.status(status.STATUS.OK).send(data);
 };
-exports.responseSuccess = responseSuccess;
