@@ -9,12 +9,12 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate({ Order, AccessToken, RefreshToken }) {
       // define association here
-      // this.hasMany(Order, { foreignKey: "user_id", as: "Order" });
-      // this.belongsTo(AccessToken, { foreignKey: "user_id", as: "AccessToken" });
-      // this.belongsTo(RefreshToken, {
-      //   foreignKey: "user_id",
-      //   as: "RefreshToken",
-      // });
+      this.hasMany(Order, { foreignKey: "user_id", as: "Order" });
+      this.belongsTo(AccessToken, { foreignKey: "user_id", as: "AccessToken" });
+      this.belongsTo(RefreshToken, {
+        foreignKey: "user_id",
+        as: "RefreshToken",
+      });
     }
   }
   User.init(

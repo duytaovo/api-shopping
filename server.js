@@ -13,18 +13,17 @@ const swaggerUI = require("swagger-ui-express");
 app.use(express.static(path.join(__dirname, "./public")));
 app.use(cors());
 app.use(express.json());
-const db = require("./models");
 
 const server = http.createServer(app);
 
 app.use("/api/v1", rootRouter);
 
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["*"],
-  },
-});
+// const io = new Server(server, {
+//   cors: {
+//     origin: "*",
+//     methods: ["*"],
+//   },
+// });
 
 server.listen(process.env.PORT, async () => {
   try {

@@ -10,12 +10,11 @@ module.exports.getProductsRules = () => {
       .if((value) => value !== undefined)
       .isInt()
       .withMessage("limit không đúng định dạng"),
-    query("category")
-      .if((value) => value !== undefined)
-      .withMessage("category không đúng định dạng"),
-    query("exclude")
-      .if((value) => value !== undefined)
-      .withMessage("exclude không đúng định dạng"),
+    // query("category")
+    //   .if((value) => value !== undefined)
+    //   .withMessage("category không đúng định dạng"),
+    query("exclude").if((value) => value !== undefined),
+    // .withMessage("exclude không đúng định dạng"),
   ];
 };
 

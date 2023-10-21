@@ -4,17 +4,32 @@ const authRouter = express.Router();
 const authMiddleware = require("../middlewares/auth.middleware");
 const helpersMiddleware = require("../middlewares/helpers.middleware");
 const authController = require("../controllers/auth.controller");
-const { authenticateToken } = require("../middlewares/authenticateToken");
+const { wrapAsync } = require("../utils/response");
 
 /**
- * @swagger
- * /:
- *   post:
- *     summary: post a  register account
- *     tags: [Auth]
+ * @openapi
+ * '/register':
+ *  post:
+ *     tags:
+ *     - Auth
+ *     summary: Create a user
+ *     requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *           schema:
+ *            type: object
+ *            required:
+ *              - email
+ *              - password
+ *            properties:
+ *              email:
+ *                type: string
+ *              name:
+ *                password: string
  *     responses:
- *       200:
- *         description: Successful response
+ *      201:
+ *        description: Created
  */
 
 authRouter.post(
@@ -23,6 +38,31 @@ authRouter.post(
   helpersMiddleware.entityValidator,
   authController.registerController
 );
+/**
+ * @openapi
+ * '/login':
+ *  post:
+ *     tags:
+ *     - Auth
+ *     summary: Login a user
+ *     requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *           schema:
+ *            type: object
+ *            required:
+ *              - email
+ *              - password
+ *            properties:
+ *              email:
+ *                type: string
+ *              name:
+ *                password: string
+ *     responses:
+ *      201:
+ *        description: Success
+ */
 
 authRouter.post(
   "/login",
@@ -31,16 +71,29 @@ authRouter.post(
   authController.loginController
 );
 
-authRouter.post("/logout", authenticateToken, (req, res) => {
-  logoutService(req.user.userUuid).then(
-    (logout) => {
-      return res.json(logout);
-    },
-    (err) => {
-      return next(new Exeptions(err.message, err.status));
-    }
-  );
+/**
+ * @openapi
+ * '/logout':
+ *  post:
+ *     tags:
+ *     - Auth
+ *     summary: Logout a user
+ *     requestBody:
+ *      required: false
+ *     responses:
+ *      201:
+ *        description: Success
+ */
+authRouter.post(
+  "/logout",
+  authMiddleware.verifyAccessToken,
+  authController.logoutController
+);
 
-  // res.json(req.user);
-});
+authRouter.post(
+  "/refresh-access-token",
+  authMiddleware.verifyRefreshToken,
+  wrapAsync(authController.refreshTokenController)
+);
+
 module.exports = authRouter;

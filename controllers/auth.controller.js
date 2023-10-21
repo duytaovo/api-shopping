@@ -1,10 +1,8 @@
 const _response = require("../utils/response");
-const crypt = require("../utils/crypt");
 const config = require("../constants/config");
 const jwt = require("../utils/jwt");
 const role_enum = require("../constants/role.enum");
 const db = require("../models");
-const lodash = require("lodash");
 const status = require("../constants/status");
 const bcrypt = require("bcryptjs");
 const { generateAcessToken } = require("../utils/generateAccessToken");
@@ -23,6 +21,7 @@ const getExpire = (req) => {
     expireRefreshTokenConfig,
   };
 };
+
 module.exports.registerController = async (req, res) => {
   const { expireAccessTokenConfig, expireRefreshTokenConfig } = getExpire(req);
   const body = req.body;
@@ -58,8 +57,8 @@ module.exports.registerController = async (req, res) => {
     const dataRes = {
       message: "Đăng ký thành công",
       data: {
-        access_token: "Bearer " + accessToken,
-        expires: config.config.EXPIRE_ACCESS_TOKEN,
+        accessToken: "Bearer " + accessToken,
+        expires: config.config.EXPIRE_ACCESSTOKEN,
         refresh_token: refreshToken,
         expires_refresh_token: expireRefreshTokenConfig,
         // user: (0, lodash.omit)(userAdd, ["password"]),
@@ -119,7 +118,7 @@ module.exports.loginController = async (req, res) => {
     const dataResponse = {
       message: "Đăng nhập thành công",
       data: {
-        access_token: "Bearer " + accessToken,
+        accessToken: "Bearer " + accessToken,
         expires: expireAccessTokenConfig,
         refresh_token: refreshToken,
         expires_refresh_token: expireRefreshTokenConfig,
@@ -132,37 +131,35 @@ module.exports.loginController = async (req, res) => {
 
 module.exports.refreshTokenController = async (req, res) => {
   const { expireAccessTokenConfig } = getExpire(req);
-  const userDB = await user_model_1.UserModel.findById(
-    req.jwtDecoded.id
-  ).lean();
+  const userDB = await db.User?.findByPk(req.jwtDecoded.id);
   if (userDB) {
     const payload = {
-      id: userDB._id,
+      id: userDB.id,
       email: userDB.email,
       roles: userDB.roles,
       created_at: new Date().toISOString(),
     };
-    const access_token = await (0, jwt.signToken)(
+    const accessToken = await signToken(
       payload,
-      config.config.SECRET_KEY,
+      config.SECRET_KEY,
       expireAccessTokenConfig
     );
-    await new access_token_model_1.AccessTokenModel({
-      user_id: req.jwtDecoded.id,
-      token: access_token,
-    }).save();
+    await db.AccessToken?.create({
+      userId: userDB.id,
+      token: accessToken,
+    });
     const response = {
       message: "Refresh Token thành công",
-      data: { access_token: "Bearer " + access_token },
+      data: { accessToken: "Bearer " + accessToken },
     };
-    return (0, response.responseSuccess)(res, response);
+    return _response.responseSuccess(res, response);
   }
   throw new response.ErrorHandler(401, "Refresh Token không tồn tại");
 };
 
 module.exports.logoutController = async (req, res) => {
   const accessToken = req.headers.authorization?.replace("Bearer ", "");
-  await db.AccessTokens?.destroy({
+  await db.AccessToken?.destroy({
     where: {
       token: accessToken,
     },

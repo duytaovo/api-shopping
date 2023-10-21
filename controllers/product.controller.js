@@ -1,15 +1,16 @@
 const _response = require("../utils/response");
-const db = require("../../models");
+const db = require("../models");
 const status = require("../constants/status");
 const upload = require("../utils/upload");
 const helper = require("../utils/helper");
 const config = require("../constants/config");
-const fs = __importDefault(require("fs"));
+const fs = require("fs");
 const lodash = require("lodash");
 const { Op } = require("sequelize");
 const { ORDER, SORT_BY } = require("../constants/product");
 
 const handleImageProduct = (product) => {
+  console.log("Product" + product);
   if (product.image !== undefined && product.image !== "") {
     product.image = helper.HOST + `/${config.ROUTE_IMAGE}/` + product.image;
   }
@@ -105,7 +106,6 @@ module.exports.getProducts = async (req, res) => {
   limit = Number(limit);
 
   let condition = {};
-
   if (category) {
     condition.category = category;
   }
@@ -133,10 +133,10 @@ module.exports.getProducts = async (req, res) => {
   }
 
   if (!ORDER.includes(order)) {
-    order = product_1.ORDER[0];
+    order = ORDER[0];
   }
   if (!SORT_BY.includes(sort_by)) {
-    sort_by = product_1.SORT_BY[0];
+    sort_by = SORT_BY[0];
   }
 
   if (name) {
@@ -147,40 +147,33 @@ module.exports.getProducts = async (req, res) => {
   try {
     const products = await db.Product.findAll({
       where: condition,
-      include: [
-        {
-          model: Category,
-          as: "categoryInfo",
-        },
-      ],
-      order: [[sort_by, order]],
+      include: ["Category"],
+      // order: [[sort_by, order]],
       offset: (page - 1) * limit,
       limit: limit,
       attributes: { exclude: ["description"] },
     });
-
     const totalProducts = await db.Product.count({ where: condition });
-    products = products.map((product) => handleImageProduct(product));
+    const _products = products.map((product) => handleImageProduct(product));
     // Chuyển đổi kết quả thành dạng plain JavaScript objects
-    const plainProducts = products.map((product) =>
+    const plainProducts = _products.map((product) =>
       product.get({ plain: true })
     );
 
     const page_size = Math.ceil(totalProducts / limit) || 1;
 
-    const response = {
+    const responseData = {
       message: "Lấy các sản phẩm thành công",
       data: {
         products: plainProducts,
         pagination: {
           page,
           limit,
-          page_size,
+          page_size: page_size,
         },
       },
     };
-
-    return _response.responseSuccess(res, response);
+    return _response.responseSuccess(res, responseData);
   } catch (error) {
     return res.status(500).json({ message: "Lỗi khi truy vấn cơ sở dữ liệu" });
   }
@@ -197,12 +190,7 @@ module.exports.getAllProducts = async (req, res) => {
   try {
     const products = await db.Product.findAll({
       where: condition,
-      include: [
-        {
-          model: Category,
-          as: "category",
-        },
-      ],
+      include: ["Category"],
       order: [["createdAt", "DESC"]],
       attributes: { exclude: ["description", "__v"] },
     });
@@ -230,28 +218,25 @@ module.exports.getProduct = async (req, res) => {
   try {
     const product = await db.Product.findOne({
       where: condition,
-      include: [
-        {
-          model: Category,
-          as: "category",
-        },
-      ],
+      include: ["Category"],
       attributes: { exclude: ["__v"] },
     });
 
     // Chuyển đổi kết quả thành dạng plain JavaScript object
-    const plainProduct = product.get({ plain: true });
+    // const plainProduct = product.get({ plain: true });
 
     if (product) {
       const response = {
         message: "Lấy sản phẩm thành công",
-        data: plainProduct,
+        data: product,
       };
       return _response.responseSuccess(res, response);
     } else {
-      throw new _response.ErrorHandler(
-        status.STATUS.NOT_FOUND,
-        "Không tìm thấy sản phẩm"
+      res.json(
+        new _response.ErrorHandler(
+          status.STATUS.NOT_FOUND,
+          "Không tìm thấy sản phẩm"
+        )
       );
     }
   } catch (error) {
@@ -384,6 +369,8 @@ module.exports.deleteManyProducts = async (req, res) => {
 module.exports.searchProduct = async (req, res) => {
   let { searchText } = req.query;
   searchText = decodeURI(searchText);
+  console.log("searchText " + searchText);
+  searchText = "abc";
 
   // Sử dụng Sequelize để thực hiện tìm kiếm
   try {
@@ -394,19 +381,14 @@ module.exports.searchProduct = async (req, res) => {
           [Op.like]: `%${searchText}%`,
         },
       },
-      include: [
-        {
-          model: Category,
-          as: "category",
-        },
-      ],
+      include: ["Category"],
       order: [["createdAt", "DESC"]],
       attributes: { exclude: ["description", "__v"] },
     });
-    products = products.map((product) => handleImageProduct(product));
+    let _products = products.map((product) => handleImageProduct(product));
 
     // Chuyển đổi kết quả thành dạng plain JavaScript objects
-    const plainProducts = products.map((product) =>
+    const plainProducts = _products.map((product) =>
       product.get({ plain: true })
     );
 

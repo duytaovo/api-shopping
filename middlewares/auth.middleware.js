@@ -3,32 +3,28 @@ const jwt = require("../utils/jwt");
 const role = require("../constants/role.enum");
 const response = require("../utils/response");
 const status = require("../constants/status");
-// const access_token_model = require("../database/models/access-token.model");
-// const refresh_token_model = require("../database/models/refresh-token.model");
+// const accessToken_model = require("../database/models/access-token.model");
+// const refreshToken_model = require("../database/models/refresh-token.model");
 const { body } = require("express-validator");
 
 const db = require("../models");
 
 module.exports.verifyAccessToken = async (req, res, next) => {
-  var _a;
-  const access_token =
-    (_a = req.headers.authorization) === null || _a === void 0
-      ? void 0
-      : _a.replace("Bearer ", "");
-  if (access_token) {
+  const accessToken = req.headers.authorization?.replace("Bearer ", "");
+  if (accessToken) {
     try {
-      const decoded = await (0, jwt.verifyToken)(
-        access_token,
+      const decoded = await jwt.verifyToken(
+        accessToken,
         config.config.SECRET_KEY
       );
       req.jwtDecoded = decoded;
-      const accessTokenDB = await access_token_model.AccessTokenModel.findOne({
-        token: access_token,
-      }).exec();
+      const accessTokenDB = await db.AccessToken?.findOne({
+        token: accessToken,
+      });
       if (accessTokenDB) {
         return next();
       }
-      return (0, response.responseError)(
+      return response.responseError(
         res,
         new response.ErrorHandler(
           status.STATUS.UNAUTHORIZED,
@@ -36,10 +32,10 @@ module.exports.verifyAccessToken = async (req, res, next) => {
         )
       );
     } catch (error) {
-      return (0, response.responseError)(res, error);
+      return response.responseError(res, error);
     }
   }
-  return (0, response.responseError)(
+  return response.responseError(
     res,
     new response.ErrorHandler(
       status.STATUS.UNAUTHORIZED,
@@ -47,23 +43,23 @@ module.exports.verifyAccessToken = async (req, res, next) => {
     )
   );
 };
+
 module.exports.verifyRefreshToken = async (req, res, next) => {
-  const refresh_token = req.body.refresh_token;
-  if (refresh_token) {
+  const refreshToken = req.body.refreshToken;
+  if (refreshToken) {
     try {
-      const decoded = await (0, jwt_1.verifyToken)(
-        refresh_token,
+      const decoded = await jwt.verifyToken(
+        refreshToken,
         config.config.SECRET_KEY
       );
       req.jwtDecoded = decoded;
-      const refreshTokenDB =
-        await refresh_token_model.RefreshTokenModel.findOne({
-          token: refresh_token,
-        }).exec();
+      const refreshTokenDB = await db.RefreshToken.findOne({
+        token: refreshToken,
+      });
       if (refreshTokenDB) {
         return next();
       }
-      return (0, response.responseError)(
+      return response.responseError(
         res,
         new response.ErrorHandler(
           status.STATUS.UNAUTHORIZED,
@@ -71,10 +67,10 @@ module.exports.verifyRefreshToken = async (req, res, next) => {
         )
       );
     } catch (error) {
-      return (0, response.responseError)(res, error);
+      return response.responseError(res, error);
     }
   }
-  return (0, response.responseError)(
+  return response.responseError(
     res,
     new response.ErrorHandler(
       status.STATUS.UNAUTHORIZED,
@@ -82,12 +78,13 @@ module.exports.verifyRefreshToken = async (req, res, next) => {
     )
   );
 };
+
 module.exports.verifyAdmin = async (req, res, next) => {
-  const userDB = await user_model.UserModel.findById(req.jwtDecoded.id).lean();
+  const userDB = await db.User.findById(req.jwtDecoded.id).lean();
   if (userDB.roles.includes(role.ROLE.ADMIN)) {
     return next();
   }
-  return (0, response.responseError)(
+  return response.responseError(
     res,
     new response.ErrorHandler(
       status.STATUS.FORBIDDEN,
@@ -95,6 +92,7 @@ module.exports.verifyAdmin = async (req, res, next) => {
     )
   );
 };
+
 module.exports.registerRules = () => {
   return [
     body("email")

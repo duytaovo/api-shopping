@@ -25,7 +25,6 @@ adminUserRouter.put(
   "/:user_id",
   authMiddleware.verifyAccessToken,
   authMiddleware.verifyAdmin,
-  helpersMiddleware.idRule("user_id"),
   helpersMiddleware.idValidator,
   userMiddleware.updateUserRules(),
   helpersMiddleware.entityValidator,
@@ -35,7 +34,6 @@ adminUserRouter.get(
   "/:user_id",
   authMiddleware.verifyAccessToken,
   authMiddleware.verifyAdmin,
-  helpersMiddleware.idRule("user_id"),
   helpersMiddleware.idValidator,
   userController.deleteUser
 );
@@ -43,7 +41,6 @@ adminUserRouter.delete(
   "/delete/:user_id",
   authMiddleware.verifyAccessToken,
   authMiddleware.verifyAdmin,
-  helpersMiddleware.idRule("user_id"),
   helpersMiddleware.idValidator,
   userController.deleteUser
 );
