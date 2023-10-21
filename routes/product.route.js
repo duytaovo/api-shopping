@@ -2,7 +2,6 @@ const express = require("express");
 const ProductController = require("../controllers/product.controller");
 const helpersMiddleware = require("../middlewares/helpers.middleware");
 const productMiddleware = require("../middlewares/product.middleware");
-const authMiddleware = require("../middlewares/auth.middleware");
 const { wrapAsync } = require("../utils/response");
 const productRouter = express.Router();
 /**
@@ -15,16 +14,16 @@ productRouter.get(
   "",
   productMiddleware.getProductsRules(),
   helpersMiddleware.entityValidator,
-  ProductController.getProducts
+  wrapAsync(ProductController.getProducts)
 );
 
-productRouter.get("/search", ProductController.searchProduct);
+productRouter.get("/search", wrapAsync(ProductController.searchProduct));
 
 productRouter.get(
   "/:product_id",
   // helpersMiddleware.idRule("product_id"),
   helpersMiddleware.idValidator,
-  ProductController.getProduct
+  wrapAsync(ProductController.getProduct)
 );
 
 module.exports = productRouter;

@@ -119,7 +119,7 @@ module.exports.updatePurchase = async (req, res) => {
       return _response.responseSuccess(res, response);
     } else {
       return res.json(
-        new response.ErrorHandler(STATUS.NOT_FOUND, "Không tìm thấy đơn")
+        new _response.ErrorHandler(STATUS.NOT_FOUND, "Không tìm thấy đơn")
       );
     }
   } catch (error) {
@@ -160,23 +160,18 @@ module.exports.buyProducts = async (req, res) => {
         const purchaseInDb = await db.Order.findOne({
           where: {
             user: req.jwtDecoded.id,
-            status: STATUS_PURCHASE.IN_CART,
+            status: _purchase.STATUS_PURCHASE.IN_CART,
             product_id: item.product_id,
           },
-          include: {
-            model: Product,
-            include: {
-              model: Category,
-            },
-          },
+          include: ["Product", "Category"],
         });
 
         if (purchaseInDb) {
           // Cập nhật thông tin đơn mua
-          const updatedPurchase = await Purchase.update(
+          const updatedPurchase = await db.Order.update(
             {
               buy_count: item.buy_count,
-              status: STATUS_PURCHASE.WAIT_FOR_CONFIRMATION,
+              status: _purchase.STATUS_PURCHASE.WAIT_FOR_CONFIRMATION,
             },
             {
               where: {
@@ -200,18 +195,13 @@ module.exports.buyProducts = async (req, res) => {
             buy_count: item.buy_count,
             price: product.price,
             price_before_discount: product.price_before_discount,
-            status: STATUS_PURCHASE.WAIT_FOR_CONFIRMATION,
+            status: _purchase.STATUS_PURCHASE.WAIT_FOR_CONFIRMATION,
           };
 
-          const addedPurchase = await Purchase.create(newPurchase);
+          const addedPurchase = await db.Order.create(newPurchase);
 
-          const addedPurchaseData = await Purchase.findByPk(addedPurchase.id, {
-            include: {
-              model: Product,
-              include: {
-                model: Category,
-              },
-            },
+          const addedPurchaseData = await db.Order.findByPk(addedPurchase.id, {
+            include: ["Product", "Category"],
           });
 
           purchases.push(addedPurchaseData.get({ plain: true }));
@@ -227,53 +217,63 @@ module.exports.buyProducts = async (req, res) => {
     data: purchases,
   };
 
-  return res.json(response);
+  return _response.responseSuccess(res, response);
 };
+
 module.exports.getPurchases = async (req, res) => {
-  const { status = purchase_1.STATUS_PURCHASE.ALL } = req.query;
+  const { status = _purchase.STATUS_PURCHASE.ALL } = req.query;
   const user_id = req.jwtDecoded.id;
   let condition = {
     user: user_id,
     status: {
-      $ne: purchase_1.STATUS_PURCHASE.IN_CART,
+      [Op.ne]: _purchase.STATUS_PURCHASE.IN_CART,
     },
   };
-  if (Number(status) !== purchase_1.STATUS_PURCHASE.ALL) {
+  if (Number(status) !== _purchase.STATUS_PURCHASE.ALL) {
     condition.status = status;
   }
-  let purchases = await purchase_model_1.PurchaseModel.find(condition)
-    .populate({
-      path: "product",
-      populate: {
-        path: "category",
-      },
-    })
-    .sort({
-      createdAt: -1,
-    })
-    .lean();
-  purchases = purchases.map((purchase) => {
-    purchase.product = (0, productController.handleImageProduct)(
-      (0, lodash.cloneDeep)(purchase.product)
-    );
-    return purchase;
-  });
-  const response = {
-    message: "Lấy đơn mua thành công",
-    data: purchases,
-  };
-  return (0, response.responseSuccess)(res, response);
+
+  try {
+    const purchases = await db.Order.findAll({
+      where: condition,
+      include: ["Product", "Order"],
+      order: [["createdAt", "DESC"]],
+    });
+
+    const purchasesData = purchases.map((purchase) => {
+      purchase.product = handleImageProduct(lodash.cloneDeep(purchase.product));
+      return purchase.get({ plain: true });
+    });
+
+    const response = {
+      message: "Lấy đơn mua thành công",
+      data: purchasesData,
+    };
+
+    return _response.responseSuccess(res, response);
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi khi lấy đơn mua" });
+  }
 };
+
 module.exports.deletePurchases = async (req, res) => {
   const purchase_ids = req.body;
   const user_id = req.jwtDecoded.id;
-  const deletedData = await purchase_model_1.PurchaseModel.deleteMany({
-    user: user_id,
-    status: purchase_1.STATUS_PURCHASE.IN_CART,
-    _id: { $in: purchase_ids },
-  });
-  return (0, response.responseSuccess)(res, {
-    message: `Xoá ${deletedData.deletedCount} đơn thành công`,
-    data: { deleted_count: deletedData.deletedCount },
-  });
+
+  try {
+    const deletedData = await db.Order.destroy({
+      where: {
+        user: user_id,
+        status: _purchase.STATUS_PURCHASE.IN_CART,
+        id: { [Op.in]: purchase_ids },
+      },
+    });
+
+    return res.json({
+      message: `Xoá ${deletedData} đơn thành công`,
+      data: { deleted_count: deletedData },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Lỗi khi xóa đơn mua" });
+  }
 };

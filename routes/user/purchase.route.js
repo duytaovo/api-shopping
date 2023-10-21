@@ -3,40 +3,46 @@ const authMiddleware = require("../../middlewares/auth.middleware");
 const helperMiddleware = require("../../middlewares/helpers.middleware");
 const purchaseMiddleware = require("../../middlewares/purchase.middleware");
 const purchaseController = require("../../controllers/purchase.controller");
-const response = require("../../utils/response");
+const { wrapAsync } = require("../../utils/response");
 
-exports.userPurchaseRouter = express.Router();
+const userPurchaseRouter = express.Router();
 
-exports.userPurchaseRouter.post(
+userPurchaseRouter.post(
   "/buy-products",
   purchaseMiddleware.buyProductsRules(),
-  helperMiddleware.default.entityValidator,
-  authMiddleware.default.verifyAccessToken,
-  response.wrapAsync(purchaseController.buyProducts)
+  helperMiddleware.entityValidator,
+  authMiddleware.verifyAccessToken,
+  wrapAsync(purchaseController.buyProducts)
 );
-exports.userPurchaseRouter.post(
+
+userPurchaseRouter.post(
   "/add-to-cart",
   purchaseMiddleware.addToCartRules(),
-  helperMiddleware.default.entityValidator,
-  authMiddleware.default.verifyAccessToken,
-  response.wrapAsync(purchaseController.addToCart)
+  helperMiddleware.entityValidator,
+  authMiddleware.verifyAccessToken,
+  wrapAsync(purchaseController.addToCart)
 );
-exports.userPurchaseRouter.put(
+
+userPurchaseRouter.put(
   "/update-purchase",
   purchaseMiddleware.updatePurchaseRules(),
-  helperMiddleware.default.entityValidator,
-  authMiddleware.default.verifyAccessToken,
-  response.wrapAsync(purchaseController.updatePurchase)
+  helperMiddleware.entityValidator,
+  authMiddleware.verifyAccessToken,
+  wrapAsync(purchaseController.updatePurchase)
 );
-exports.userPurchaseRouter.delete(
+
+userPurchaseRouter.delete(
   "",
   purchaseMiddleware.deletePurchasesRules(),
-  helperMiddleware.default.entityValidator,
-  authMiddleware.default.verifyAccessToken,
-  response.wrapAsync(purchaseController.deletePurchases)
+  helperMiddleware.entityValidator,
+  authMiddleware.verifyAccessToken,
+  wrapAsync(purchaseController.deletePurchases)
 );
-exports.userPurchaseRouter.get(
+
+userPurchaseRouter.get(
   "",
-  authMiddleware.default.verifyAccessToken,
-  response.wrapAsync(purchaseController.getPurchases)
+  authMiddleware.verifyAccessToken,
+  wrapAsync(purchaseController.getPurchases)
 );
+
+module.exports = userPurchaseRouter;

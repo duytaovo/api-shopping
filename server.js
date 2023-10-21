@@ -5,7 +5,6 @@ const http = require("http");
 const path = require("path");
 const cors = require("cors");
 const { sequelize } = require("./models");
-const { Server } = require("socket.io");
 const { rootRouter } = require("./routes");
 const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUI = require("swagger-ui-express");
@@ -17,13 +16,6 @@ app.use(express.json());
 const server = http.createServer(app);
 
 app.use("/api/v1", rootRouter);
-
-// const io = new Server(server, {
-//   cors: {
-//     origin: "*",
-//     methods: ["*"],
-//   },
-// });
 
 server.listen(process.env.PORT, async () => {
   try {
