@@ -397,7 +397,7 @@ module.exports.searchProduct = async (req, res) => {
       data: plainProducts,
     };
 
-    return res.json(response);
+    return _response.responseSuccess(res, response);
   } catch (error) {
     return res.status(500).json({ message: "Lỗi khi tìm kiếm sản phẩm" });
   }

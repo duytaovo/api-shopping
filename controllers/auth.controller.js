@@ -1,6 +1,5 @@
 const _response = require("../utils/response");
 const config = require("../constants/config");
-const jwt = require("../utils/jwt");
 const role_enum = require("../constants/role.enum");
 const db = require("../models");
 const status = require("../constants/status");
