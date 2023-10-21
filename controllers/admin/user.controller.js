@@ -153,7 +153,7 @@ module.exports.updateMe = async (req, res) => {
     phone,
     avatar,
   } = form;
-  const user = (0, lodash.omitBy)(
+  const user = lodash.omitBy(
     {
       email,
       password,
@@ -165,17 +165,17 @@ module.exports.updateMe = async (req, res) => {
     },
     (value) => value === undefined || value === ""
   );
-  const userDB = await user_model_1.UserModel.findById(
-    req.jwtDecoded.id
-  ).lean();
+  const userDB = await db.User.findByPk(req.jwtDecoded.id);
   if (user.password) {
-    const hash_password = (0, crypt.hashValue)(password);
+    const hash_password = crypt.hashValue(password);
     if (hash_password === userDB.password) {
-      Object.assign(user, { password: (0, crypt.hashValue)(new_password) });
+      Object.assign(user, { password: crypt.hashValue(new_password) });
     } else {
-      throw new _response.ErrorHandler(status.STATUS.UNPROCESSABLE_ENTITY, {
-        password: "Password không đúng",
-      });
+      return res.json(
+        new _response.ErrorHandler(status.STATUS.UNPROCESSABLE_ENTITY, {
+          password: "Password không đúng",
+        })
+      );
     }
   }
 
@@ -194,7 +194,7 @@ module.exports.updateMe = async (req, res) => {
 };
 module.exports.deleteUser = async (req, res) => {
   const user_id = req.params.id;
-  const userDB = await db.Users?.destroy({
+  const userDB = await db.User?.destroy({
     where: {
       id: user_id,
     },
