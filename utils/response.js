@@ -6,7 +6,6 @@ const wrapAsync = (func) => {
   };
 };
 exports.wrapAsync = wrapAsync;
-
 class ErrorHandler extends Error {
   constructor(status, error) {
     super();
@@ -14,9 +13,9 @@ class ErrorHandler extends Error {
     this.error = error;
   }
 }
-exports.ErrorHandler = ErrorHandler;
+module.exports.ErrorHandler = ErrorHandler;
 
-const responseError = (res, error) => {
+module.exports.responseError = (res, error) => {
   if (error instanceof ErrorHandler) {
     const status = error.status;
     // Case just string
@@ -35,7 +34,6 @@ const responseError = (res, error) => {
     .status(status.STATUS.INTERNAL_SERVER_ERROR)
     .send({ message: error.message });
 };
-exports.responseError = responseError;
 
 module.exports.responseSuccess = (res, data) => {
   return res.status(status.STATUS.OK).send(data);

@@ -1,4 +1,5 @@
 const { validationResult } = require("express-validator");
+const expressValidator = require("express-validator");
 const status = require("../constants/status");
 const response = require("../utils/response");
 // const validate = require("../utils/validate");

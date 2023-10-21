@@ -1,52 +1,51 @@
 const express = require("express");
-const userController = require("../controllers/user.controller");
+const userController = require("../../controllers/admin/user.controller");
+const helpersMiddleware = require("../../middlewares/helpers.middleware");
+const userMiddleware = require("../../middlewares/user.middleware");
+const authMiddleware = require("../../middlewares/auth.middleware");
+const { wrapAsync } = require("../../utils/response");
 
-const helpers_middleware_1 = require("../../middleware/helpers.middleware");
-
-const user_middleware_1 = require("../../middleware/user.middleware");
-
-const auth_middleware_1 = require("../../middleware/auth.middleware");
-
-const response_1 = require("../../utils/response");
-const adminUserRouter = (0, express.Router)();
+const adminUserRouter = express.Router();
 adminUserRouter.get(
   "",
-  auth_middleware_1.default.verifyAccessToken,
-  auth_middleware_1.default.verifyAdmin,
-  userController.default.getUsers
+  authMiddleware.verifyAccessToken,
+  authMiddleware.verifyAdmin,
+  userController.getUsers
 );
 adminUserRouter.post(
   "",
-  auth_middleware_1.default.verifyAccessToken,
-  auth_middleware_1.default.verifyAdmin,
-  user_middleware_1.default.addUserRules(),
-  helpers_middleware_1.default.entityValidator,
-  (0, response_1.wrapAsync)(userController.default.addUser)
+  authMiddleware.verifyAccessToken,
+  authMiddleware.verifyAdmin,
+  userMiddleware.addUserRules,
+  helpersMiddleware.entityValidator,
+  // userController.addUser
+  userController.addUser
 );
 adminUserRouter.put(
   "/:user_id",
-  auth_middleware_1.default.verifyAccessToken,
-  auth_middleware_1.default.verifyAdmin,
-  helpers_middleware_1.default.idRule("user_id"),
-  helpers_middleware_1.default.idValidator,
-  user_middleware_1.default.updateUserRules(),
-  helpers_middleware_1.default.entityValidator,
-  (0, response_1.wrapAsync)(userController.default.updateUser)
+  authMiddleware.verifyAccessToken,
+  authMiddleware.verifyAdmin,
+  helpersMiddleware.idRule("user_id"),
+  helpersMiddleware.idValidator,
+  userMiddleware.updateUserRules(),
+  helpersMiddleware.entityValidator,
+  userController.updateUser
 );
 adminUserRouter.get(
   "/:user_id",
-  auth_middleware_1.default.verifyAccessToken,
-  auth_middleware_1.default.verifyAdmin,
-  helpers_middleware_1.default.idRule("user_id"),
-  helpers_middleware_1.default.idValidator,
-  (0, response_1.wrapAsync)(userController.default.deleteUser)
+  authMiddleware.verifyAccessToken,
+  authMiddleware.verifyAdmin,
+  helpersMiddleware.idRule("user_id"),
+  helpersMiddleware.idValidator,
+  userController.deleteUser
 );
 adminUserRouter.delete(
   "/delete/:user_id",
-  auth_middleware_1.default.verifyAccessToken,
-  auth_middleware_1.default.verifyAdmin,
-  helpers_middleware_1.default.idRule("user_id"),
-  helpers_middleware_1.default.idValidator,
-  (0, response_1.wrapAsync)(userController.default.deleteUser)
+  authMiddleware.verifyAccessToken,
+  authMiddleware.verifyAdmin,
+  helpersMiddleware.idRule("user_id"),
+  helpersMiddleware.idValidator,
+  userController.deleteUser
 );
-exports.default = adminUserRouter;
+
+module.exports = adminUserRouter;

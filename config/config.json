@@ -1,10 +1,12 @@
 {
   "development": {
-    "username": "root",
-    "password": "Duytao0352811529_@@",
-    "database": "api-shop",
-    "host": "localhost",
-    "dialect": "mysql"
+    "username": "sql_phuoccong_in",
+    "password": "tHXhbjKPX2SdMbmX",
+    "database": "sql_phuoccong_in",
+    "host": "vp.midvietnam.com",
+    "port": "3308",
+    "dialect": "mysql",
+    "timezone": "+07:00"
   },
   "test": {
     "username": "root",

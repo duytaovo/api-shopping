@@ -2,11 +2,10 @@ const crypt = require("../../utils/crypt");
 const _response = require("../../utils/response");
 const status = require("../../constants/status");
 const lodash = require("lodash");
-const upload = require("../../utils/upload");
 const config = require("../../constants/config");
-const db = require("../models");
+const db = require("../../models");
 
-const addUser = async (req, res) => {
+module.exports.addUser = async (req, res) => {
   const form = req.body;
   const {
     email,
@@ -56,7 +55,7 @@ const addUser = async (req, res) => {
   );
 };
 
-const getUsers = async (req, res) => {
+module.exports.getUsers = async (req, res) => {
   const usersDB = await db.User.findAll();
   const responseData = {
     message: "Lấy người dùng thành công",
@@ -65,7 +64,7 @@ const getUsers = async (req, res) => {
   return _response.responseSuccess(res, responseData);
 };
 
-const getDetailMySelf = async (req, res) => {
+module.exports.getDetailMySelf = async (req, res) => {
   const userDB = await db.Users?.findOne({
     where: { email: req.jwtDecoded.email },
   });
@@ -87,7 +86,7 @@ const getDetailMySelf = async (req, res) => {
     );
   }
 };
-const getUser = async (req, res) => {
+module.exports.getUser = async (req, res) => {
   const usersDB = await db.user.findOne({
     where: { email: req.body.email },
   });
@@ -98,7 +97,7 @@ const getUser = async (req, res) => {
   return _response.responseSuccess(res, responseData);
 };
 
-const updateUser = async (req, res) => {
+module.exports.updateUser = async (req, res) => {
   const form = req.body;
   const { password, address, date_of_birth, name, phone, roles, avatar } = form;
   const user = {
@@ -142,7 +141,7 @@ const updateUser = async (req, res) => {
 //   };
 //   return (0, _response.responseSuccess)(res, response);
 // };
-const updateMe = async (req, res) => {
+module.exports.updateMe = async (req, res) => {
   const form = req.body;
   const {
     email,
@@ -193,7 +192,7 @@ const updateMe = async (req, res) => {
   //   };
   //   return (0, _response.responseSuccess)(res, response);
 };
-const deleteUser = async (req, res) => {
+module.exports.deleteUser = async (req, res) => {
   const user_id = req.params.id;
   const userDB = await db.Users?.destroy({
     where: {
@@ -211,14 +210,3 @@ const deleteUser = async (req, res) => {
     );
   }
 };
-const userController = {
-  addUser,
-  getUsers,
-  getDetailMySelf,
-  getUser,
-  updateUser,
-  deleteUser,
-  updateMe,
-  //   uploadAvatar,
-};
-exports.default = userController;
