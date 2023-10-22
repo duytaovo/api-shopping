@@ -80,7 +80,7 @@ module.exports.verifyRefreshToken = async (req, res, next) => {
 };
 
 module.exports.verifyAdmin = async (req, res, next) => {
-  const userDB = await db.User.findById(req.jwtDecoded.id).lean();
+  const userDB = await db.User.findByPk(req.jwtDecoded.id);
   if (userDB.roles.includes(role.ROLE.ADMIN)) {
     return next();
   }

@@ -1,6 +1,7 @@
 const _response = require("../utils/response");
 const { STATUS } = require("../constants/status");
 const db = require("../models");
+const { Op } = require("sequelize");
 
 module.exports.addCategory = async (req, res) => {
   const name = req.body.name;
@@ -55,12 +56,10 @@ module.exports.getCategories = async (req, res) => {
 };
 
 module.exports.getCategory = async (req, res) => {
+  const id = req.params.category_id;
   try {
-    const category = await Category.findByPk(req.params.category_id, {
-      attributes: { exclude: ["__v"] },
-    });
-
-    if (category) {
+    const category = await db.Category.findByPk(id, {});
+    if (category !== null) {
       const categoryData = category.get({ plain: true });
 
       const response = {
@@ -70,17 +69,17 @@ module.exports.getCategory = async (req, res) => {
 
       return _response.responseSuccess(res, response);
     } else {
-      throw new response.ErrorHandler(
-        STATUS.BAD_REQUEST,
-        "Không tìm thấy Category"
+      return res.json(
+        new _response.ErrorHandler(
+          STATUS.BAD_REQUEST,
+          "Không tìm thấy Category"
+        )
       );
     }
   } catch (error) {
     return res.status(500).json({ message: "Lỗi khi lấy thông tin Category" });
   }
 };
-
-const { Op } = require("sequelize");
 
 module.exports.updateCategory = async (req, res) => {
   const { name } = req.body;

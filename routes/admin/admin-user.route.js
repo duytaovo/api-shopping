@@ -18,7 +18,6 @@ adminUserRouter.post(
   authMiddleware.verifyAdmin,
   userMiddleware.addUserRules,
   helpersMiddleware.entityValidator,
-  // userController.addUser
   userController.addUser
 );
 adminUserRouter.put(

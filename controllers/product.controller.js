@@ -10,7 +10,6 @@ const { Op } = require("sequelize");
 const { ORDER, SORT_BY } = require("../constants/product");
 
 const handleImageProduct = (product) => {
-  console.log("Product" + product);
   if (product.image !== undefined && product.image !== "") {
     product.image = helper.HOST + `/${config.ROUTE_IMAGE}/` + product.image;
   }
@@ -294,9 +293,11 @@ module.exports.updateProduct = async (req, res) => {
       };
       return _response.responseSuccess(res, response);
     } else {
-      throw new _response.ErrorHandler(
-        status.STATUS.NOT_FOUND,
-        "Không tìm thấy sản phẩm"
+      res.json(
+        new _response.ErrorHandler(
+          status.STATUS.NOT_FOUND,
+          "Không tìm thấy sản phẩm"
+        )
       );
     }
   } catch (error) {
@@ -318,9 +319,11 @@ module.exports.deleteProduct = async (req, res) => {
       // await product.destroy();
       return _response.responseSuccess(res, { message: "Xóa thành công" });
     } else {
-      throw new _response.ErrorHandler(
-        status.STATUS.NOT_FOUND,
-        "Không tìm thấy sản phẩm"
+      res.json(
+        new _response.ErrorHandler(
+          status.STATUS.NOT_FOUND,
+          "Không tìm thấy sản phẩm"
+        )
       );
     }
   } catch (error) {
@@ -369,8 +372,6 @@ module.exports.deleteManyProducts = async (req, res) => {
 module.exports.searchProduct = async (req, res) => {
   let { searchText } = req.query;
   searchText = decodeURI(searchText);
-  console.log("searchText " + searchText);
-  searchText = "abc";
 
   // Sử dụng Sequelize để thực hiện tìm kiếm
   try {

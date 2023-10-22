@@ -138,22 +138,24 @@ module.exports.refreshTokenController = async (req, res) => {
       roles: userDB.roles,
       created_at: new Date().toISOString(),
     };
-    const accessToken = await signToken(
+
+    const accessToken = await generateAcessToken(
       payload,
-      config.SECRET_KEY,
+      config.config.SECRET_KEY,
       expireAccessTokenConfig
     );
     await db.AccessToken?.create({
       userId: userDB.id,
       token: accessToken,
     });
+
     const response = {
       message: "Refresh Token thành công",
       data: { accessToken: "Bearer " + accessToken },
     };
     return _response.responseSuccess(res, response);
   }
-  throw new response.ErrorHandler(401, "Refresh Token không tồn tại");
+  res.json(new _response.ErrorHandler(401, "Refresh Token không tồn tại"));
 };
 
 module.exports.logoutController = async (req, res) => {

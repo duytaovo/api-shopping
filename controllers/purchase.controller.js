@@ -1,20 +1,23 @@
 const _purchase = require("../constants/purchase");
 const _status = require("../constants/status");
 const _response = require("../utils/response");
-const productController = require("./product.controller");
 const db = require("../models");
 const lodash = require("lodash");
+const { Op } = require("sequelize");
 
 module.exports.addToCart = async (req, res) => {
   const { product_id, buy_count } = req.body;
-
   try {
     const product = await db.Product.findByPk(product_id);
-
-    if (product) {
+    if (!product) {
       if (buy_count > product.quantity) {
         // Throw an error if buy_count exceeds product quantity
-        throw new Error("Số lượng vượt quá số lượng sản phẩm");
+        res.json(
+          new _response.ErrorHandler(
+            _status.STATUS.NOT_ACCEPTABLE,
+            "Số lượng vượt quá số lượng sản phẩm"
+          )
+        );
       }
 
       const purchaseInDb = await db.Order.findOne({
@@ -46,7 +49,7 @@ module.exports.addToCart = async (req, res) => {
           status: _purchase.STATUS_PURCHASE.IN_CART,
         };
         const addedPurchase = await db.Order.create(purchase);
-        data = await Purchase.findByPk(addedPurchase.id);
+        data = await db.Order.findByPk(addedPurchase.id);
       }
 
       const response = {
@@ -56,7 +59,12 @@ module.exports.addToCart = async (req, res) => {
 
       return _response.responseSuccess(res, response);
     } else {
-      return res.json(new Error("Không tìm thấy sản phẩm"));
+      res.json(
+        _response.ErrorHandler(
+          _status.STATUS.NOT_FOUND,
+          "Không tìm thấy sản phẩm"
+        )
+      );
     }
   } catch (error) {
     return res.status(500).json({ message: "Lỗi server" });
@@ -77,22 +85,21 @@ module.exports.updatePurchase = async (req, res) => {
     });
 
     if (!purchaseInDb) {
-      res
-        .status(500)
-        .json(
-          _response.ErrorHandler(_status.STATUS.NOT_FOUND, "Không tìm thấy đơn")
-        );
+      res.json(
+        new _response.ErrorHandler(
+          _status.STATUS.NOT_FOUND,
+          "Không tìm thấy đơn"
+        )
+      );
     }
 
     if (buy_count > purchaseInDb.product.quantity) {
-      res
-        .status(500)
-        .json(
-          _response.ErrorHandler(
-            _status.STATUS.NOT_ACCEPTABLE,
-            "Số lượng vượt quá số lượng sản phẩm"
-          )
-        );
+      res.json(
+        new _response.ErrorHandler(
+          _status.STATUS.NOT_ACCEPTABLE,
+          "Số lượng vượt quá số lượng sản phẩm"
+        )
+      );
     }
 
     // Cập nhật đơn mua với số lượng mới
@@ -118,7 +125,7 @@ module.exports.updatePurchase = async (req, res) => {
 
       return _response.responseSuccess(res, response);
     } else {
-      return res.json(
+      res.json(
         new _response.ErrorHandler(STATUS.NOT_FOUND, "Không tìm thấy đơn")
       );
     }
@@ -129,86 +136,86 @@ module.exports.updatePurchase = async (req, res) => {
 
 module.exports.buyProducts = async (req, res) => {
   const purchases = [];
-
-  for (const item of req.body) {
-    try {
-      // Tìm thông tin sản phẩm dựa trên product_id
-      const product = await db.Product.findOne({
-        where: {
-          id: item.product_id,
-        },
-      });
-
-      if (!product) {
-        return res.json(
-          new _response.ErrorHandler(
-            STATUS.NOT_FOUND,
-            "Không tìm thấy sản phẩm"
-          )
-        );
-      }
-
-      if (item.buy_count > product.quantity) {
-        return res.json(
-          new _response.ErrorHandler(
-            STATUS.NOT_ACCEPTABLE,
-            "Số lượng mua vượt quá số lượng sản phẩm"
-          )
-        );
-      } else {
-        // Tìm đơn mua trong giỏ hàng của người dùng
-        const purchaseInDb = await db.Order.findOne({
-          where: {
-            user: req.jwtDecoded.id,
-            status: _purchase.STATUS_PURCHASE.IN_CART,
-            product_id: item.product_id,
-          },
-          include: ["Product", "Category"],
-        });
-
-        if (purchaseInDb) {
-          // Cập nhật thông tin đơn mua
-          const updatedPurchase = await db.Order.update(
-            {
-              buy_count: item.buy_count,
-              status: _purchase.STATUS_PURCHASE.WAIT_FOR_CONFIRMATION,
-            },
-            {
-              where: {
-                id: purchaseInDb.id,
-              },
-              returning: true,
-            }
+  if (Array.isArray(req.body)) {
+    const items = req.body;
+    for (const item of items) {
+      try {
+        // Tìm thông tin sản phẩm dựa trên product_id
+        const product = await db.Product.findByPk(item.product_id);
+        if (!product) {
+          res.json(
+            new _response.ErrorHandler(
+              _status.STATUS.NOT_FOUND,
+              "Không tìm thấy sản phẩm"
+            )
           );
+        }
 
-          if (updatedPurchase[0] > 0) {
-            const updatedPurchaseData = updatedPurchase[1][0].get({
-              plain: true,
-            });
-            purchases.push(updatedPurchaseData);
-          }
+        if (item.buy_count > product.quantity) {
+          res.json(
+            new _response.ErrorHandler(
+              _status.STATUS.NOT_ACCEPTABLE,
+              "Số lượng mua vượt quá số lượng sản phẩm"
+            )
+          );
         } else {
-          // Tạo mới đơn mua nếu không tồn tại
-          const newPurchase = {
-            user: req.jwtDecoded.id,
-            product_id: item.product_id,
-            buy_count: item.buy_count,
-            price: product.price,
-            price_before_discount: product.price_before_discount,
-            status: _purchase.STATUS_PURCHASE.WAIT_FOR_CONFIRMATION,
-          };
-
-          const addedPurchase = await db.Order.create(newPurchase);
-
-          const addedPurchaseData = await db.Order.findByPk(addedPurchase.id, {
+          // Tìm đơn mua trong giỏ hàng của người dùng
+          const purchaseInDb = await db.Order.findOne({
+            where: {
+              user: req.jwtDecoded.id,
+              status: _purchase.STATUS_PURCHASE.IN_CART,
+              product_id: item.product_id,
+            },
             include: ["Product", "Category"],
           });
 
-          purchases.push(addedPurchaseData.get({ plain: true }));
+          if (purchaseInDb) {
+            // Cập nhật thông tin đơn mua
+            const updatedPurchase = await db.Order.update(
+              {
+                buy_count: item.buy_count,
+                status: _purchase.STATUS_PURCHASE.WAIT_FOR_CONFIRMATION,
+              },
+              {
+                where: {
+                  id: purchaseInDb.id,
+                },
+                returning: true,
+              }
+            );
+
+            if (updatedPurchase[0] > 0) {
+              const updatedPurchaseData = updatedPurchase[1][0].get({
+                plain: true,
+              });
+              purchases.push(updatedPurchaseData);
+            }
+          } else {
+            // Tạo mới đơn mua nếu không tồn tại
+            const newPurchase = {
+              user: req.jwtDecoded.id,
+              product_id: item.product_id,
+              buy_count: item.buy_count,
+              price: product.price,
+              price_before_discount: product.price_before_discount,
+              status: _purchase.STATUS_PURCHASE.WAIT_FOR_CONFIRMATION,
+            };
+
+            const addedPurchase = await db.Order.create(newPurchase);
+
+            const addedPurchaseData = await db.Order.findByPk(
+              addedPurchase.id,
+              {
+                include: ["Product", "Category"],
+              }
+            );
+
+            purchases.push(addedPurchaseData.get({ plain: true }));
+          }
         }
+      } catch (error) {
+        return res.status(500).json({ message: "Lỗi khi mua sản phẩm" });
       }
-    } catch (error) {
-      return res.status(500).json({ message: "Lỗi khi mua sản phẩm" });
     }
   }
 
