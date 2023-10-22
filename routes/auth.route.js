@@ -5,6 +5,7 @@ const authMiddleware = require("../middlewares/auth.middleware");
 const helpersMiddleware = require("../middlewares/helpers.middleware");
 const authController = require("../controllers/auth.controller");
 const { wrapAsync } = require("../utils/response");
+const { authenticateToken } = require("../utils/generateAccessToken");
 
 /**
  * @openapi
@@ -92,7 +93,7 @@ authRouter.post(
 
 authRouter.post(
   "/refresh-access-token",
-  authMiddleware.verifyRefreshToken,
+  authMiddleware.verifyAccessToken,
   wrapAsync(authController.refreshTokenController)
 );
 

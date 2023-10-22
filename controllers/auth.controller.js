@@ -4,7 +4,10 @@ const role_enum = require("../constants/role.enum");
 const db = require("../models");
 const status = require("../constants/status");
 const bcrypt = require("bcryptjs");
-const { generateAcessToken } = require("../utils/generateAccessToken");
+const {
+  generateAcessToken,
+  signToken,
+} = require("../utils/generateAccessToken");
 
 const getExpire = (req) => {
   let expireAccessTokenConfig = Number(req.headers["expire-access-token"]);
@@ -39,19 +42,19 @@ module.exports.registerController = async (req, res) => {
       roles: [role_enum.ROLE.USER],
       created_at: new Date().toISOString(),
     };
-    const accessToken = await generateAcessToken(
+    const accessToken = await signToken(
       payloadJWT,
       config.config.SECRET_KEY,
       expireAccessTokenConfig
     );
 
-    const refreshToken = await generateAcessToken(
+    const refreshToken = await signToken(
       payloadJWT,
       config.config.SECRET_KEY,
       expireRefreshTokenConfig
     );
-    await db.AccessToken.create({ id: userAdd.id, token: accessToken });
-    await db.RefreshToken.create({ id: userAdd.id, token: refreshToken });
+    // await db.AccessToken.create({ id: userAdd.id, token: accessToken });
+    // await db.RefreshToken.create({ id: userAdd.id, token: refreshToken });
 
     const dataRes = {
       message: "Đăng ký thành công",
@@ -100,19 +103,19 @@ module.exports.loginController = async (req, res) => {
       roles: user.roles,
       created_at: new Date().toISOString(),
     };
-    const accessToken = await generateAcessToken(
+    const accessToken = await signToken(
       payloadJWT,
       config.config.SECRET_KEY,
       expireAccessTokenConfig
     );
 
-    const refreshToken = await generateAcessToken(
+    const refreshToken = await signToken(
       payloadJWT,
       config.config.SECRET_KEY,
       expireRefreshTokenConfig
     );
-    await db.AccessToken.create({ token: accessToken });
-    await db.RefreshToken.create({ token: refreshToken });
+    // await db.AccessToken.create({ id: user.id, token: accessToken });
+    // await db.RefreshToken.create({ id: user.id, token: refreshToken });
 
     const dataResponse = {
       message: "Đăng nhập thành công",

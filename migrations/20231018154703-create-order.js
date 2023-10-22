@@ -9,17 +9,17 @@ module.exports = {
         primaryKey: true,
         type: Sequelize.INTEGER,
       },
-      buy_count: {
-        type: Sequelize.NUMBER,
-      },
+      // buy_count: {
+      //   type: Sequelize.STRING,
+      // },
       price: {
         type: Sequelize.STRING,
       },
-      price_before_discount: {
-        type: Sequelize.NUMBER,
-      },
+      // price_before_discount: {
+      //   type: Sequelize.STRING,
+      // },
       status: {
-        type: Sequelize.NUMBER,
+        type: Sequelize.STRING,
       },
       createdAt: {
         allowNull: false,

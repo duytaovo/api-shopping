@@ -10,6 +10,21 @@ const productRouter = express.Router();
  * @route products
  * @method get
  */
+
+/**
+ * @openapi
+ * '/':
+ *  get:
+ *     tags:
+ *     - Product
+ *     summary: Get Product
+ *     requestBody:
+ *      required: false
+ *     responses:
+ *      200:
+ *        description: Success
+ */
+
 productRouter.get(
   "",
   productMiddleware.getProductsRules(),
@@ -17,8 +32,34 @@ productRouter.get(
   wrapAsync(ProductController.getProducts)
 );
 
+/**
+ * @openapi
+ * '/search':
+ *  get:
+ *     tags:
+ *     - Product
+ *     summary: Get search Product
+ *     requestBody:
+ *      required: false
+ *     responses:
+ *      200:
+ *        description: Success
+ */
 productRouter.get("/search", wrapAsync(ProductController.searchProduct));
 
+/**
+ * @openapi
+ * '/:product_id':
+ *  get:
+ *     tags:
+ *     - Product
+ *     summary: Get product detail
+ *     requestBody:
+ *      required: false
+ *     responses:
+ *      200:
+ *        description: Success
+ */
 productRouter.get(
   "/:product_id",
   // helpersMiddleware.idRule("product_id"),

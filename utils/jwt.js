@@ -4,7 +4,7 @@ const response = require("./response");
 
 const signToken = (payload, secret_key, token_life) => {
   return new Promise((resolve, reject) => {
-    jsonwebtoken.default.sign(
+    jsonwebtoken.sign(
       payload,
       secret_key,
       { expiresIn: token_life },
@@ -21,7 +21,9 @@ exports.signToken = signToken;
 
 const verifyToken = (token, secret_key) => {
   return new Promise((resolve, reject) => {
-    jsonwebtoken.default.verify(token, secret_key, (error, decoded) => {
+    jsonwebtoken.verify(token, secret_key, (error, decoded) => {
+      console.log(decoded);
+      console.log(error);
       if (error) {
         if (error.name === "TokenExpiredError") {
           reject(

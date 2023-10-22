@@ -3,8 +3,6 @@ const jwt = require("../utils/jwt");
 const role = require("../constants/role.enum");
 const response = require("../utils/response");
 const status = require("../constants/status");
-// const accessToken_model = require("../database/models/access-token.model");
-// const refreshToken_model = require("../database/models/refresh-token.model");
 const { body } = require("express-validator");
 
 const db = require("../models");
@@ -17,6 +15,7 @@ module.exports.verifyAccessToken = async (req, res, next) => {
         accessToken,
         config.config.SECRET_KEY
       );
+      console.log(decoded);
       req.jwtDecoded = decoded;
       const accessTokenDB = await db.AccessToken?.findOne({
         token: accessToken,

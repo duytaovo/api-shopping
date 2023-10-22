@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 exports.config = {
-  SECRET_KEY: process.env.SECRET_KEY_JWT || "",
+  SECRET_KEY: "e3e0ba88a5fa477f9624d3fb9ff79681",
   EXPIRE_ACCESS_TOKEN: 7 * 24 * 60 * 60,
   EXPIRE_REFRESH_TOKEN: 100 * 24 * 60 * 60,
 };
