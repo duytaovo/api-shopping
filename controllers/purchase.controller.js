@@ -4,15 +4,13 @@ const _response = require("../utils/response");
 const db = require("../models");
 const lodash = require("lodash");
 const { Op } = require("sequelize");
-
+const { QueryTypes } = require("sequelize");
 module.exports.addToCart = async (req, res) => {
   const { product_id, buy_count } = req.body;
-  console.log(buy_count);
   try {
     const product = await db.Product.findOne({ where: { id: product_id } });
     if (product) {
-      if (buy_count > product.quantity) {
-        console.log(buy_count);
+      if (buy_count > product.num_quantity) {
         // Throw an error if buy_count exceeds product quantity
         res.json(
           new _response.ErrorHandler(
@@ -21,37 +19,47 @@ module.exports.addToCart = async (req, res) => {
           )
         );
       }
-
-      const purchaseInDb = await db.Order.findOne({
+      const purchaseInDb = await db.OrderProduct.findOne({
         where: {
-          user: req.jwtDecoded.id,
-          status: _purchase.STATUS_PURCHASE.IN_CART,
-          product: product_id,
+          // user_id: req.jwtDecoded.id,
+          // status: _purchase.STATUS_PURCHASE.IN_CART,
+          product_id: product_id,
         },
+        include: ["Order"],
       });
+      // console.log("aa" + purchaseInDb);
+      // const purchaseInDb = await sequelize.query(
+      //   `SELECT * FROM Orders JOIN OrderProducts ON Orders.order_id = OrderProducts.order_id WHERE Orders.user_id = ${req.jwtDecoded.id} AND Orders.status = 1 AND OrderProducts.product_id = ${product_id}`
+      // );
       console.log(purchaseInDb);
-
+      // We didn't need to destructure the result here - the results were returned directly
       let data;
 
       if (purchaseInDb) {
         // Update existing purchase
-        const updatedPurchase = await db.Order.update(
-          { buy_count: purchaseInDb.buy_count + buy_count },
+        const updatedPurchase = await db.OrderProduct.update(
+          { quantity: purchaseInDb.quantity + buy_count },
           { where: { id: purchaseInDb.id } }
         );
 
-        data = await db.Order.findByPk(updatedPurchase.id);
+        data = await db.OrderProduct.findByPk(updatedPurchase.id);
       } else {
         // Create a new purchase
-        const purchase = {
-          user: req.jwtDecoded.id,
-          product: product_id,
-          buy_count: buy_count,
-          price: product.price,
-          price_before_discount: product.price_before_discount,
+        console.log("aaaabbbb");
+        console.log(buy_count * product.price);
+        const order = {
+          user_id: req.jwtDecoded.id,
           status: _purchase.STATUS_PURCHASE.IN_CART,
+          price: buy_count * product.price,
         };
-        const addedPurchase = await db.Order.create(purchase);
+        const addedOrder = await db.Order.create(order);
+        console.log(addedOrder);
+        const orderProduct = {
+          order_id: addedOrder.id,
+          product_id: product_id,
+          quantity: buy_count,
+        };
+        const addedPurchase = await db.OrderProduct.create(orderProduct);
         data = await db.Order.findByPk(addedPurchase.id);
       }
 

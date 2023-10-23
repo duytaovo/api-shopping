@@ -19,8 +19,8 @@ app.use("/api/v1", rootRouter);
 
 server.listen(process.env.PORT, async () => {
   try {
-    await sequelize.authenticate();
-    // await sequelize.sync({ force: true });
+    // await sequelize.authenticate();
+    await sequelize.sync({ force: true });
     // await sequelize.sync({ alert: true });
     console.log(`Server is running on port ${process.env.PORT}`);
   } catch (err) {

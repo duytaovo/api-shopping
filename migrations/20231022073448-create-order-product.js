@@ -10,7 +10,7 @@ module.exports = {
         type: Sequelize.INTEGER,
       },
       quantity: {
-        type: Sequelize.INTEGER,
+        type: Sequelize.FLOAT,
       },
       isFeedBack: {
         type: Sequelize.BOOLEAN,

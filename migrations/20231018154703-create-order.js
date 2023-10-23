@@ -13,7 +13,7 @@ module.exports = {
       //   type: Sequelize.STRING,
       // },
       price: {
-        type: Sequelize.STRING,
+        type: Sequelize.FLOAT,
       },
       // price_before_discount: {
       //   type: Sequelize.STRING,

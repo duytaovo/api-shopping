@@ -1,76 +1,76 @@
-'use strict';
+"use strict";
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    await queryInterface.createTable('Products', {
+    await queryInterface.createTable("Products", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
       },
       name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       brand: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       imgUrl: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       price: {
-        type: Sequelize.STRING
+        type: Sequelize.FLOAT,
       },
       sale_price: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       description: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       display: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       os: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       main_camera: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       selfi_camera: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       chip: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       Ram: {
-        type: Sequelize.STRING
+        type: Sequelize.FLOAT,
       },
       Rom: {
-        type: Sequelize.STRING
+        type: Sequelize.FLOAT,
       },
       battery: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       priority: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
       },
       num_quantity: {
-        type: Sequelize.STRING
+        type: Sequelize.FLOAT,
       },
       isDeleted: {
-        type: Sequelize.BOOLEAN
+        type: Sequelize.BOOLEAN,
       },
       createdAt: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
       },
       updatedAt: {
         allowNull: false,
-        type: Sequelize.DATE
-      }
+        type: Sequelize.DATE,
+      },
     });
   },
   async down(queryInterface, Sequelize) {
-    await queryInterface.dropTable('Products');
-  }
+    await queryInterface.dropTable("Products");
+  },
 };

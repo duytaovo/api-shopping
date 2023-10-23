@@ -22,8 +22,6 @@ exports.signToken = signToken;
 const verifyToken = (token, secret_key) => {
   return new Promise((resolve, reject) => {
     jsonwebtoken.verify(token, secret_key, (error, decoded) => {
-      console.log(decoded);
-      console.log(error);
       if (error) {
         if (error.name === "TokenExpiredError") {
           reject(

@@ -22,9 +22,8 @@ module.exports = (sequelize, DataTypes) => {
       phone_receiver: DataTypes.STRING,
       address_receiver: DataTypes.STRING,
       message: DataTypes.STRING,
-      // buy_count: DataTypes.STRING,
-      price: DataTypes.STRING,
-      status: DataTypes.STRING,
+      total_price: DataTypes.FLOAT,
+      status: DataTypes.FLOAT,
     },
     {
       sequelize,
