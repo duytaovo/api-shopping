@@ -7,10 +7,12 @@ const { Op } = require("sequelize");
 
 module.exports.addToCart = async (req, res) => {
   const { product_id, buy_count } = req.body;
+  console.log(buy_count);
   try {
-    const product = await db.Product.findByPk(product_id);
-    if (!product) {
+    const product = await db.Product.findOne({ where: { id: product_id } });
+    if (product) {
       if (buy_count > product.quantity) {
+        console.log(buy_count);
         // Throw an error if buy_count exceeds product quantity
         res.json(
           new _response.ErrorHandler(
@@ -27,6 +29,7 @@ module.exports.addToCart = async (req, res) => {
           product: product_id,
         },
       });
+      console.log(purchaseInDb);
 
       let data;
 

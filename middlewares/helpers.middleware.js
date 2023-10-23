@@ -30,6 +30,7 @@ module.exports.idValidator = (req, res, next) => {
     new response.ErrorHandler(status.STATUS.BAD_REQUEST, error)
   );
 };
+
 module.exports.entityValidator = (req, res, next) => {
   const errors = expressValidator.validationResult(req);
   if (errors.isEmpty()) {

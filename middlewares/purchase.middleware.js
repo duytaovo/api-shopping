@@ -1,28 +1,7 @@
 const expressValidator = require("express-validator");
 const validate = require("../utils/validate");
 const buyProductsRules = () => {
-  return [
-    expressValidator
-      .body()
-      .isArray()
-      .withMessage("body phải là array")
-      .custom((value) => {
-        if (value.length === 0) {
-          return false;
-        }
-        const isPassed = value.every((item) => {
-          if (
-            validate.isMongoId(item.product_id) &&
-            Number.isInteger(item.buy_count)
-          ) {
-            return true;
-          }
-          return false;
-        });
-        return isPassed;
-      })
-      .withMessage("body không đúng định dạng"),
-  ];
+  return [expressValidator.body().isArray().withMessage("body phải là array")];
 };
 exports.buyProductsRules = buyProductsRules;
 const addToCartRules = () => {
@@ -30,9 +9,7 @@ const addToCartRules = () => {
     expressValidator
       .body("product_id")
       .exists({ checkFalsy: true })
-      .withMessage("product_id không được để trống")
-      .isMongoId()
-      .withMessage("product_id không đúng định dạng"),
+      .withMessage("product_id không được để trống"),
     expressValidator
       .body("buy_count")
       .exists({ checkFalsy: true })

@@ -15,12 +15,11 @@ module.exports.verifyAccessToken = async (req, res, next) => {
         accessToken,
         config.config.SECRET_KEY
       );
-      console.log(decoded);
       req.jwtDecoded = decoded;
-      const accessTokenDB = await db.AccessToken?.findOne({
-        token: accessToken,
-      });
-      if (accessTokenDB) {
+      // const accessTokenDB = await db.AccessToken?.findOne({
+      //   token: accessToken,
+      // });
+      if (decoded) {
         return next();
       }
       return response.responseError(

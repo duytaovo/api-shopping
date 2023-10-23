@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Feedback.init(
     {
-      rating: DataTypes.STRING,
+      rating: DataTypes.FLOAT,
       comment: DataTypes.STRING,
     },
     {

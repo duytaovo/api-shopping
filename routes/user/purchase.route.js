@@ -21,9 +21,9 @@ const userPurchaseRouter = express.Router();
  */
 userPurchaseRouter.post(
   "/buy-products",
-  // purchaseMiddleware.buyProductsRules(),
-  // helperMiddleware.entityValidator,
-  // authMiddleware.verifyAccessToken,
+  purchaseMiddleware.buyProductsRules(),
+  helperMiddleware.entityValidator,
+  authMiddleware.verifyAccessToken,
   wrapAsync(purchaseController.buyProducts)
 );
 /**
@@ -43,8 +43,8 @@ userPurchaseRouter.post(
 userPurchaseRouter.post(
   "/add-to-cart",
   // purchaseMiddleware.addToCartRules(),
-  // helperMiddleware.entityValidator,
-  // authMiddleware.verifyAccessToken,
+  helperMiddleware.entityValidator,
+  authMiddleware.verifyAccessToken,
   wrapAsync(purchaseController.addToCart)
 );
 /**

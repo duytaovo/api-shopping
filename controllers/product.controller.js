@@ -139,15 +139,15 @@ module.exports.getProducts = async (req, res) => {
   }
 
   if (name) {
-    condition.name = { [Op.iLike]: `%${name}%` };
+    condition.name = { [Op.like]: `%${name}%` };
   }
 
   // Sử dụng Sequelize để truy vấn cơ sở dữ liệu
   try {
     const products = await db.Product.findAll({
       where: condition,
-      include: ["Category"],
-      // order: [[sort_by, order]],
+      include: ["Category", "Feedback"],
+      order: [[sort_by, order]],
       offset: (page - 1) * limit,
       limit: limit,
       attributes: { exclude: ["description"] },
@@ -217,13 +217,11 @@ module.exports.getProduct = async (req, res) => {
   try {
     const product = await db.Product.findOne({
       where: condition,
-      include: ["Category"],
-      attributes: { exclude: ["__v"] },
+      include: ["Category", "Feedback"],
     });
 
     // Chuyển đổi kết quả thành dạng plain JavaScript object
     // const plainProduct = product.get({ plain: true });
-
     if (product) {
       const response = {
         message: "Lấy sản phẩm thành công",
@@ -382,9 +380,9 @@ module.exports.searchProduct = async (req, res) => {
           [Op.like]: `%${searchText}%`,
         },
       },
-      include: ["Category"],
+      include: ["Category", "Feedback"],
       order: [["createdAt", "DESC"]],
-      attributes: { exclude: ["description", "__v"] },
+      attributes: { exclude: ["description"] },
     });
     let _products = products.map((product) => handleImageProduct(product));
 

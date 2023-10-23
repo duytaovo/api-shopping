@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   OrderProduct.init(
     {
-      quantity: DataTypes.STRING,
+      quantity: DataTypes.INTEGER,
       isFeedBack: DataTypes.BOOLEAN,
     },
     {
