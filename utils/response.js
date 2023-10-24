@@ -38,3 +38,7 @@ module.exports.responseError = (res, error) => {
 module.exports.responseSuccess = (res, data) => {
   return res.status(status.STATUS.OK).send(data);
 };
+
+module.exports.responseSuccess = (res, data) => {
+  return res.status(status.STATUS.CREATED).send(data);
+};
